@@ -37,7 +37,7 @@ contract Collectables is ERC721Metadata {
     address ownerAddress = ownerOf(_tokenId);
     uint256 collectablePrice = tokenIdToCollectableInfo[_tokenId].price;
     require(msg.sender != ownerAddress, 'You already own this collectable!');
-    require(msg.value > collectablePrice, "You need to have enough Ether");
+    require(msg.value >= collectablePrice, "You need to have enough Ether");
     _transferFrom(ownerAddress, msg.sender, _tokenId);
     address payable ownerAddressPayable = _make_payable(ownerAddress);
     ownerAddressPayable.transfer(collectablePrice);

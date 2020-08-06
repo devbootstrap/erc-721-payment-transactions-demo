@@ -33,7 +33,8 @@ const App = {
   },
 
   refreshPage: async function() {
-    const { name, getCollectableTokenIds, getCollectableItem } = this.meta.methods;
+    const { web3 } = this;
+    const { getCollectableTokenIds, getCollectableItem } = this.meta.methods;
     const tokenIds = await getCollectableTokenIds().call()
     const collectablesElement = document.getElementsByClassName("collectables")[0];
 
@@ -41,9 +42,11 @@ const App = {
     for(let id of tokenIds) {
       str += '<tr>'
       let item = await getCollectableItem(id).call()
-      str += `<td>${id}</td><td>${item[0]}</td><td>${item[1]}</td>`
+      let price = web3.utils.fromWei(item[1].toString(), 'Ether')
+
+      str += `<td>${id}</td><td>${item[0]}</td><td>${price}</td>`
       if (this.canBuy(item)) {
-        str += '<td>Horray! You can buy this!</td>'
+        str += `<td><button onclick="App.buyCollectable(${id}, ${price})">BUY</button></td>`
       } else {
         str += '<td>You are the owner!</td>'
       }
@@ -57,21 +60,28 @@ const App = {
   },
 
   createCollectable: async function() {
+    const { web3 } = this;
     const tokenId = document.getElementById("tokenId").value;
     const name = document.getElementById("name").value;
-    const price = parseInt(document.getElementById("price").value);
+    const priceInEth = document.getElementById("price").value;
+    const priceInWei = web3.utils.toWei(priceInEth, 'ether')
 
     this.setStatus("Minting new token... (please wait)");
 
     const { createCollectable } = this.meta.methods;
-    await createCollectable(tokenId, name, price).send({ from: this.account });
+    await createCollectable(tokenId, name, priceInWei).send({ from: this.account });
 
     this.setStatus("Transaction complete!");
     this.refreshPage();
   },
 
-  buyCollectable: async function () {
+  buyCollectable: async function (tokenId, price) {
+    const { web3 } = this;
+    const { buyCollectable } = this.meta.methods;
 
+    await buyCollectable(tokenId).send({from: this.account, value: web3.utils.toWei(price.toString(), 'ether') })
+
+    this.refreshPage();
   },
 
   setStatus: function(message) {
