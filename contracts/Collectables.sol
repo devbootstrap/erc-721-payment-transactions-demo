@@ -11,17 +11,20 @@ contract Collectables is ERC721Metadata {
 
   mapping(uint256 => CollectableInfo) public tokenIdToCollectableInfo;
 
+  uint256[] tokenIds;
+
   constructor(string memory _name, string memory _symbol)
     ERC721Metadata(_name, _symbol) public {}
 
-  function createCollectable(uint256 _tokenId,
-                    string memory _name,
-                    uint256 _price) public {
+  function createCollectable( uint256 _tokenId,
+                              string memory _name,
+                              uint256 _price) public {
     CollectableInfo memory collectable = CollectableInfo({
       name: _name,
       price: _price
     });
     tokenIdToCollectableInfo[_tokenId] = collectable;
+    tokenIds.push(_tokenId);
     _mint(msg.sender, _tokenId);
   }
 
@@ -42,5 +45,17 @@ contract Collectables is ERC721Metadata {
     if(msg.value > collectablePrice) {
         msg.sender.transfer(msg.value - collectablePrice);
     }
+  }
+
+  function getCollectableTokenIds() public view returns(uint256[] memory) {
+    return tokenIds;
+  }
+
+  function getCollectableItem(uint256 _tokenId) public view returns (string memory name,
+                                                       uint256 price,
+                                                       address owner) {
+    return (tokenIdToCollectableInfo[_tokenId].name,
+            tokenIdToCollectableInfo[_tokenId].price,
+            ownerOf(_tokenId));
   }
 }

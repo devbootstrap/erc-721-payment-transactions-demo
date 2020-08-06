@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>MetaCoin | Truffle Webpack Demo w/ Frontend</title>
+    <title>Collectables | A simple demo ERC 721 Dapp</title>
   </head>
   <style>
     input {
@@ -10,22 +10,25 @@
     }
   </style>
   <body>
-    <h1>MetaCoin — Example Truffle Dapp</h1>
-    <p>You have <strong class="balance">loading...</strong> META</p>
+    <h1>Collectables | A simple demo ERC 721 Dapp</h1>
 
-    <h1>Send MetaCoin</h1>
+    <h2>Create Collectable</h2>
 
-    <label for="amount">Amount:</label>
-    <input type="text" id="amount" placeholder="e.g. 95" />
+    <label for="tokenId">Token Id:</label>
+    <input type="text" id="tokenId" placeholder="e.g. 1" />
 
-    <label for="receiver">To address:</label>
-    <input
-      type="text"
-      id="receiver"
-      placeholder="e.g. 0x93e66d9baea28c17d9fc393b53e3fbdd76899dae"
-    />
+    <label for="name">Name:</label>
+    <input type="text" id="name" placeholder="e.g. MyCoolCollectable" />
 
-    <button onclick="App.sendCoin()">Send MetaCoin</button>
+    <label for="price">Price:</label>
+    <input type="text" id="price" placeholder="e.g. 2000" />
+
+    <button onclick="App.createCollectable()">Create Collectable</button>
+
+    <h2>Available Collectables</h2>
+
+    <ul class='collectables'>
+    </ul>
 
     <p id="status"></p>
     <p>

@@ -1,5 +1,5 @@
 import Web3 from "web3";
-import metaCoinArtifact from "../../build/contracts/MetaCoin.json";
+import collectablesArtifact from "../../build/contracts/Collectables.json";
 
 const App = {
   web3: null,
@@ -12,9 +12,11 @@ const App = {
     try {
       // get contract instance
       const networkId = await web3.eth.net.getId();
-      const deployedNetwork = metaCoinArtifact.networks[networkId];
+      const deployedNetwork = collectablesArtifact.networks[networkId];
+
+      // console.log('address', deployedNetwork.address)
       this.meta = new web3.eth.Contract(
-        metaCoinArtifact.abi,
+        collectablesArtifact.abi,
         deployedNetwork.address,
       );
 
@@ -22,31 +24,43 @@ const App = {
       const accounts = await web3.eth.getAccounts();
       this.account = accounts[0];
 
-      this.refreshBalance();
+      console.log(accounts[0])
+
+      this.refreshPage();
     } catch (error) {
       console.error("Could not connect to contract or chain.");
     }
   },
 
-  refreshBalance: async function() {
-    const { getBalance } = this.meta.methods;
-    const balance = await getBalance(this.account).call();
+  refreshPage: async function() {
+    const { name, getCollectableTokenIds, getCollectableItem } = this.meta.methods;
 
-    const balanceElement = document.getElementsByClassName("balance")[0];
-    balanceElement.innerHTML = balance;
+    const tokenIds = await getCollectableTokenIds().call()
+
+    // console.log('TOKEN IDS', tokenIds)
+    const collectablesElement = document.getElementsByClassName("collectables")[0];
+    let str = ''
+    for(let id of tokenIds) {
+      console.log('id', id)
+      let item = await getCollectableItem(id).call()
+      console.log(item)
+      str += `<li>TokenId: ${id} | Name: ${item[0]} | Price: ${item[1]}</li>`
+    }
+    collectablesElement.innerHTML = str;
   },
 
-  sendCoin: async function() {
-    const amount = parseInt(document.getElementById("amount").value);
-    const receiver = document.getElementById("receiver").value;
+  createCollectable: async function() {
+    const tokenId = document.getElementById("tokenId").value;
+    const name = document.getElementById("name").value;
+    const price = parseInt(document.getElementById("price").value);
 
-    this.setStatus("Initiating transaction... (please wait)");
+    this.setStatus("Minting new token... (please wait)");
 
-    const { sendCoin } = this.meta.methods;
-    await sendCoin(receiver, amount).send({ from: this.account });
+    const { createCollectable } = this.meta.methods;
+    await createCollectable(tokenId, name, price).send({ from: this.account });
 
     this.setStatus("Transaction complete!");
-    this.refreshBalance();
+    this.refreshPage();
   },
 
   setStatus: function(message) {
