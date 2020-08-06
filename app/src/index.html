@@ -8,6 +8,9 @@
       display: block;
       margin-bottom: 12px;
     }
+    table, th, td {
+      border: 1px solid black;
+    }
   </style>
   <body>
     <h1>Collectables | A simple demo ERC 721 Dapp</h1>
@@ -27,8 +30,18 @@
 
     <h2>Available Collectables</h2>
 
-    <ul class='collectables'>
-    </ul>
+    <table>
+      <thead>
+        <tr>
+          <th>TokenId</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Purchase</th>
+        </tr>
+      </thead>
+      <tbody class='collectables'>
+      </tbody>
+    </table>
 
     <p id="status"></p>
     <p>

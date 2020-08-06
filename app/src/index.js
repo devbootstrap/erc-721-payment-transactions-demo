@@ -34,19 +34,26 @@ const App = {
 
   refreshPage: async function() {
     const { name, getCollectableTokenIds, getCollectableItem } = this.meta.methods;
-
     const tokenIds = await getCollectableTokenIds().call()
-
-    // console.log('TOKEN IDS', tokenIds)
     const collectablesElement = document.getElementsByClassName("collectables")[0];
+
     let str = ''
     for(let id of tokenIds) {
-      console.log('id', id)
+      str += '<tr>'
       let item = await getCollectableItem(id).call()
-      console.log(item)
-      str += `<li>TokenId: ${id} | Name: ${item[0]} | Price: ${item[1]}</li>`
+      str += `<td>${id}</td><td>${item[0]}</td><td>${item[1]}</td>`
+      if (this.canBuy(item)) {
+        str += '<td>Horray! You can buy this!</td>'
+      } else {
+        str += '<td>You are the owner!</td>'
+      }
+      str += '</tr>'
     }
     collectablesElement.innerHTML = str;
+  },
+
+  canBuy: function(item) {
+    return this.account != item[2];
   },
 
   createCollectable: async function() {
@@ -61,6 +68,10 @@ const App = {
 
     this.setStatus("Transaction complete!");
     this.refreshPage();
+  },
+
+  buyCollectable: async function () {
+
   },
 
   setStatus: function(message) {
