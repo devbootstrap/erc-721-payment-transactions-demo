@@ -10,6 +10,11 @@ const App = {
     const { web3 } = this;
 
     try {
+      // Unfortunately setting the 'handleRevert' property to true
+      // causes other errors when fetching the revertReason
+      // see transaction error handling below
+      // web3.eth.handleRevert = true
+
       // get contract instance
       const networkId = await web3.eth.net.getId();
       const deployedNetwork = collectablesArtifact.networks[networkId];
@@ -59,11 +64,12 @@ const App = {
 
   createCollectable: async function() {
     const { web3 } = this;
+
+    const { createCollectable } = this.meta.methods;
     const tokenId = document.getElementById("tokenId").value;
     const name = document.getElementById("name").value;
     const priceInEth = document.getElementById("price").value;
     const priceInWei = web3.utils.toWei(priceInEth, 'ether')
-    const { createCollectable } = this.meta.methods;
 
     let msg
     this.setStatus("Minting new token... (please wait)");
@@ -74,7 +80,12 @@ const App = {
       })
     }
     catch(e) {
-      msg = e.message;
+      // Since there was an error in the VM we need to make a call to the function to get the revertReason returned
+      await createCollectable(tokenId, name, priceInWei).call({ from: this.account })
+      .catch(revertReason => {
+        // Unfortunately the object returned is not really an object!
+        msg = JSON.parse({ revertReason }.revertReason.message.replace('[object Object]', '')).message
+      })
     }
 
     await this.refreshPage();
@@ -84,13 +95,19 @@ const App = {
   buyCollectable: async function (tokenId, price) {
     const { web3 } = this;
     const { buyCollectable } = this.meta.methods;
+    const payload = {from: this.account, value: web3.utils.toWei(price.toString(), 'ether') }
     let msg
 
     try {
-      await buyCollectable(tokenId).send({from: this.account, value: web3.utils.toWei(price.toString(), 'ether') })
+      await buyCollectable(tokenId).send(payload)
       msg = 'Transaction successful!'
     } catch (e) {
-      msg = e.message
+      // Since there was an error in the VM we need to make a call to the function to get the revertReason returned
+      await buyCollectable(tokenId).call(payload)
+      .catch(revertReason => {
+        // Unfortunately the object returned is not really an object!
+        msg = JSON.parse({ revertReason }.revertReason.message.replace('[object Object]', '')).message
+      })
     }
 
     await this.refreshPage();
