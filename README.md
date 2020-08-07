@@ -4,6 +4,8 @@ This application was created using the [Tuffle Webpack Box](https://github.com/t
 
 ## Run the app!
 
+You will need `ganache-cli` and `truffle` installed. Then...
+
 **Start Ganache**
 
 ```
@@ -13,6 +15,7 @@ ganache-cli -m 'theme narrow finger canal enact photo census miss economy hotel 
 **Compile and migrate conrtracts**
 
 ```
+npm install
 truffle compile
 truffle migrate --reset
 ```
@@ -21,6 +24,7 @@ truffle migrate --reset
 
 ```
 cd app
+npm install
 npm run dev
 ```
 
