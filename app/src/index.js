@@ -14,7 +14,6 @@ const App = {
       const networkId = await web3.eth.net.getId();
       const deployedNetwork = collectablesArtifact.networks[networkId];
 
-      // console.log('address', deployedNetwork.address)
       this.meta = new web3.eth.Contract(
         collectablesArtifact.abi,
         deployedNetwork.address,
@@ -64,16 +63,15 @@ const App = {
     const name = document.getElementById("name").value;
     const priceInEth = document.getElementById("price").value;
     const priceInWei = web3.utils.toWei(priceInEth, 'ether')
-
-    this.setStatus("Minting new token... (please wait)");
-
     const { createCollectable } = this.meta.methods;
 
     let msg
+    this.setStatus("Minting new token... (please wait)");
 
     try {
-      await createCollectable(tokenId, name, priceInWei).send({ from: this.account })
-      msg = 'Collectable minted!'
+      await createCollectable(tokenId, name, priceInWei).send({ from: this.account }).on('transactionHash', function(hash) {
+        msg = `Collectable minted! Check on <a href="https://rinkeby.etherscan.io/tx/${hash}">Etherscan</a>`
+      })
     }
     catch(e) {
       msg = e.message;
