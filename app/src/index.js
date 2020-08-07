@@ -24,8 +24,6 @@ const App = {
       const accounts = await web3.eth.getAccounts();
       this.account = accounts[0];
 
-      console.log(accounts[0])
-
       this.refreshPage();
     } catch (error) {
       console.error("Could not connect to contract or chain.");
@@ -53,6 +51,7 @@ const App = {
       str += '</tr>'
     }
     collectablesElement.innerHTML = str;
+    this.setStatus('Page Loaded')
   },
 
   canBuy: function(item) {
@@ -69,19 +68,35 @@ const App = {
     this.setStatus("Minting new token... (please wait)");
 
     const { createCollectable } = this.meta.methods;
-    await createCollectable(tokenId, name, priceInWei).send({ from: this.account });
 
-    this.setStatus("Transaction complete!");
-    this.refreshPage();
+    let msg
+
+    try {
+      await createCollectable(tokenId, name, priceInWei).send({ from: this.account })
+      msg = 'Collectable minted!'
+    }
+    catch(e) {
+      msg = e.message;
+    }
+
+    await this.refreshPage();
+    this.setStatus(msg);
   },
 
   buyCollectable: async function (tokenId, price) {
     const { web3 } = this;
     const { buyCollectable } = this.meta.methods;
+    let msg
 
-    await buyCollectable(tokenId).send({from: this.account, value: web3.utils.toWei(price.toString(), 'ether') })
+    try {
+      await buyCollectable(tokenId).send({from: this.account, value: web3.utils.toWei(price.toString(), 'ether') })
+      msg = 'Transaction successful!'
+    } catch (e) {
+      msg = e.message
+    }
 
-    this.refreshPage();
+    await this.refreshPage();
+    this.setStatus(msg)
   },
 
   setStatus: function(message) {
