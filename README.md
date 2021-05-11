@@ -24,6 +24,7 @@ truffle migrate --reset
 
 ```
 cd app
+npm install webpack-cli@3.3.8 -D  # Required to fix 'cannot find module webpack-cli/bin/config-yargs' issue
 npm install
 npm run dev
 ```
